@@ -1,0 +1,7 @@
+# Set PATH environment variable
+PATH=/usr/local/bin:/usr/bin:/bin
+
+# Run the ML training job every minute for testing
+0 1 * * 0 . /etc/environment && cd /app && python3 train.py >> /var/log/cron.log 2>&1
+
+# Empty line at the end is required
