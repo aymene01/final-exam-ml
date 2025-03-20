@@ -15,5 +15,22 @@ services:
       - mysql_data:/var/lib/mysql
     restart: unless-stopped
 
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: ml_api
+    ports:
+      - "5000:5000"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_DATABASE: ml_database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    depends_on:
+      - mysql
+    volumes:
+      - ./api:/app
+
 volumes:
   mysql_data:
