@@ -1,11 +1,13 @@
 import re
 
 import pandas as pd
+import joblib
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from db import DatabaseOperations
+from s3 import upload_to_minio
 
 db = DatabaseOperations()
 
@@ -17,7 +19,11 @@ data = {
     "label": []
 }
 
-for element in last_data:
+# Split data into training and testing sets
+data_train = last_data[:int(len(last_data) / 2)]
+data_test = last_data[int(len(last_data) / 2):]
+
+for element in data_train:
     data["text"].append(element["text"])
     data["label"].append(element["positive"])
 
@@ -33,65 +39,29 @@ def clean_text(text: str) -> str:
 
 df["text_clean"] = df["text"].apply(clean_text)
 
-french_stopwords = [
-    "le",
-    "la",
-    "les",
-    "un",
-    "une",
-    "des",
-    "du",
-    "de",
-    "dans",
-    "et",
-    "en",
-    "au",
-    "aux",
-    "avec",
-    "ce",
-    "ces",
-    "pour",
-    "par",
-    "sur",
-    "pas",
-    "plus",
-    "où",
-    "mais",
-    "ou",
-    "donc",
-    "ni",
-    "car",
-    "ne",
-    "que",
-    "qui",
-    "quoi",
-    "quand",
-    "à",
-    "son",
-    "sa",
-    "ses",
-    "ils",
-    "elles",
-    "nous",
-    "vous",
-    "est",
-    "sont",
-    "cette",
-    "cet",
-    "aussi",
-    "être",
-    "avoir",
-    "faire",
-    "comme",
-    "tout",
-    "bien",
-    "mal",
-    "on",
-    "lui",
+english_stopwords = [
+    "the",
+    "and",
+    "is",
+    "in",
+    "to",
+    "of",
+    "that",
+    "was",
+    "for",
+    "with",
+    "as",
+    "an",
+    "at",
+    "by",
+    "but",
+    "by",
+    "but",
+    "but",
 ]
 
 # Vectorisation (bag of words)
-vectorizer = CountVectorizer(stop_words=french_stopwords, max_features=100)
+vectorizer = CountVectorizer(stop_words=english_stopwords, max_features=100)
 X = vectorizer.fit_transform(df["text_clean"])
 y = df["label"]
 
@@ -116,12 +86,9 @@ print("Matrice de confusion :")
 print(confusion_matrix(y_test, y_pred))
 
 # Nouvelles données
-new_comments = [
-    "Je ne supporte pas cette personne.",  # Haineux
-    "Cette vidéo est incroyable, merci pour votre travail.",  # Non haineux
-    "Arrête de dire n'importe quoi, imbécile.",  # Haineux
-    "Une excellente présentation, bravo à toute l'équipe.",  # Non haineux
-]
+new_comments = []
+for element in data_test:
+    new_comments.append(element["text"])
 
 # Nettoyage et vectorisation
 new_comments_clean = [clean_text(comment) for comment in new_comments]
@@ -131,3 +98,12 @@ new_comments_vectorized = vectorizer.transform(new_comments_clean)
 predictions = model.predict(new_comments_vectorized)
 for comment, label in zip(new_comments, predictions):
     print(f"Commentaire : '{comment}' -> {'Haineux' if label == 1 else 'Non haineux'}")
+
+# Save model
+file_name = 'trained_model.joblib'
+joblib.dump(model, file_name)
+print(f"Model saved to {file_name}")
+
+upload_to_minio(file_name, 'ml-models', file_name)
+
+print("Model saved locally and uploaded to MinIO")

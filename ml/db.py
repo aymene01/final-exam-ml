@@ -9,8 +9,8 @@ class DatabaseOperations:
     def __init__(self, host=None, user=None, password=None, database=None):
         """Initialize database connection parameters"""
         self.host = host or os.environ.get('DB_HOST', 'localhost')
-        self.user = user or os.environ.get('DB_USER', 'sentiment_user')
-        self.password = password or os.environ.get('DB_PASSWORD', 'sentiment_password')
+        self.user = user or os.environ.get('DB_USER', 'user')
+        self.password = password or os.environ.get('DB_PASSWORD', 'password')
         self.database = database or os.environ.get('DB_NAME', 'sentiment_db')
         self.connection = None
     
