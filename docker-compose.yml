@@ -23,8 +23,8 @@ services:
     ports:
       - "5000:5000"
     environment:
-      MYSQL_HOST: mysql
-      MYSQL_DATABASE: ml_database
+      MYSQL_HOST: ml_mysql
+      MYSQL_DATABASE: sentiment_db
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     depends_on:
