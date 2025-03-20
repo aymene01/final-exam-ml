@@ -5,39 +5,23 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
+from db import DatabaseOperations
 
+db = DatabaseOperations()
 
+# Get data from database
+last_data = db.fetch_last_7_days_data()
 
 data = {
-    "text": [
-        "Je te déteste, tu es horrible !",  # Haineux
-        "J'aime beaucoup cette vidéo, merci.",  # Non haineux
-        "Va te faire voir, imbécile.",  # Haineux
-        "Quel contenu inspirant, bravo à l'équipe !",  # Non haineux
-        "Tu es vraiment nul et inutile.",  # Haineux
-        "Je suis impressionné par la qualité de cette vidéo.",  # Non haineux
-        "Ferme-la, personne ne veut entendre ça.",  # Haineux
-        "C'est une discussion constructive, merci pour vos efforts.",  # Non haineux
-        "Ce commentaire est complètement stupide et inutile.",  # Haineux
-        "Merci pour cette vidéo, elle m'a beaucoup aidé !",  # Non haineux
-        "Personne n'a besoin de voir des bêtises pareilles.",  # Haineux
-        "Excellent contenu, continuez comme ça !",  # Non haineux
-        "Tu ne comprends rien, arrête de commenter.",  # Haineux
-        "Bravo, c'est exactement ce que je cherchais.",  # Non haineux
-        "Espèce d'idiot, tu ne sais même pas de quoi tu parles.",  # Haineux
-        "Cette vidéo est très claire, merci pour le travail.",  # Non haineux
-        "Tu es une honte, personne ne veut lire ça.",  # Haineux
-        "Le tutoriel est super bien expliqué, merci !",  # Non haineux
-        "C'est complètement débile, arrête de poster.",  # Haineux
-        "J'adore cette chaîne, toujours des vidéos intéressantes.",  # Non haineux
-        "Dégage d'ici, personne ne te supporte.",  # Haineux
-        "Merci pour ces conseils, c'est vraiment utile.",  # Non haineux
-        "T'es vraiment le pire, tes vidéos sont nulles.",  # Haineux
-        "Une très bonne vidéo, claire et précise, bravo !",  # Non haineux
-    ],
-    "label": [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+    "text": [],
+    "label": []
 }
 
+for element in last_data:
+    data["text"].append(element["text"])
+    data["label"].append(element["positive"])
+
+print(data)
 df = pd.DataFrame(data)
 
 def clean_text(text: str) -> str:
