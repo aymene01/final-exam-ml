@@ -1,7 +1,7 @@
 import boto3
 from botocore.config import Config
 import os
-
+from botocore.exceptions import ClientError
 def upload_to_minio(file_path, bucket_name, object_name):
     """Upload a file to MinIO S3 storage"""
     try:
