@@ -8,6 +8,7 @@ The project consists of three main services:
 
 1. **API (Flask)**
    - REST service for sentiment analysis
+   - `/docs` endpoint to display swagger
    - `/analyze` endpoint for analyzing tweets
    - Results storage in MySQL
 
