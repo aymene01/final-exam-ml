@@ -32,43 +32,6 @@ class DatabaseOperations:
         """Close the database connection"""
         if self.connection and self.connection.is_connected():
             self.connection.close()
-    
-    def fetch_last_7_days_data(self):
-        """Fetch training data from the last 7 days"""
-        try:
-            connection = self.connect()
-            if not connection:
-                return None
-                
-            cursor = connection.cursor(dictionary=True)
-            
-            # Calculate date 7 days ago from today
-            seven_days_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
-            
-            # Query to get tweets from the last 7 days
-            query = """
-                SELECT id, text, positive, negative, created_at 
-                FROM tweets 
-                WHERE created_at >= %s
-                ORDER BY created_at DESC
-            """
-            
-            cursor.execute(query, (seven_days_ago,))
-            results = cursor.fetchall()
-            
-            if not results:
-                print("No data found in the last 7 days")
-                return []
-            
-            return results
-            
-        except Error as e:
-            print(f"Error fetching data: {e}")
-            return []
-        finally:
-            if cursor:
-                cursor.close()
-            self.disconnect()
 
     def fetch_all_training_data(self):
         """Fetch all training data from the database"""
