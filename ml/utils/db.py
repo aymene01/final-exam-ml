@@ -33,6 +33,38 @@ class DatabaseOperations:
         if self.connection and self.connection.is_connected():
             self.connection.close()
 
+    def fetch_last_7_days_data(self):
+        """Fetch data from the last 7 days"""
+        try:
+            connection = self.connect()
+            if not connection:
+                return None
+                
+            cursor = connection.cursor(dictionary=True)
+            
+            # Query to get data from the last 7 days
+            query = """
+                SELECT id, text, positive, negative, created_at 
+                FROM tweets 
+                WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+            """
+            cursor.execute(query)
+            results = cursor.fetchall()
+            
+            if not results:
+                print("No data found in the last 7 days")
+                return []
+                
+            return results
+            
+        except Error as e:
+            print(f"Error fetching data: {e}")
+            return []
+        finally:
+            if cursor:
+                cursor.close()
+            self.disconnect()
+
     def fetch_all_training_data(self):
         """Fetch all training data from the database"""
         try:
@@ -60,63 +92,7 @@ class DatabaseOperations:
             if cursor:
                 cursor.close()
             self.disconnect()
-    
-    def save_tweet(self, text: str, positive: int, negative: int) -> bool:
-        """Save a new tweet with sentiment labels"""
-        try:
-            connection = self.connect()
-            if not connection:
-                return False
-                
-            cursor = connection.cursor()
-            
-            query = """
-                INSERT INTO tweets (text, positive, negative) 
-                VALUES (%s, %s, %s)
-            """
-            
-            cursor.execute(query, (text, positive, negative))
-            connection.commit()
-            
-            return True
-            
-        except Error as e:
-            print(f"Error saving tweet: {e}")
-            return False
-        finally:
-            if cursor:
-                cursor.close()
-            self.disconnect()
-            
-    def save_multiple_tweets(self, tweets_data: List[Dict]) -> bool:
-        """Save multiple tweets with their sentiment values"""
-        try:
-            connection = self.connect()
-            if not connection:
-                return False
-                
-            cursor = connection.cursor()
-            
-            query = """
-                INSERT INTO tweets (text, positive, negative) 
-                VALUES (%s, %s, %s)
-            """
-            
-            data = [(t['text'], t['positive'], t['negative']) for t in tweets_data]
-            cursor.executemany(query, data)
-            connection.commit()
-            
-            return True
-            
-        except Error as e:
-            print(f"Error saving tweets: {e}")
-            return False
-        finally:
-            if cursor:
-                cursor.close()
-            self.disconnect()
-
-
+ 
 def test_db_operations():
     db_ops = DatabaseOperations()
     df = db_ops.fetch_last_7_days_data()

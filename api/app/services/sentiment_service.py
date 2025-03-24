@@ -33,7 +33,7 @@ class SentimentService:
                         logger.info(f"Waiting {delay} seconds before next attempt...")
                         time.sleep(delay)
                         continue
-                    raise Exception("Models not found in MinIO after maximum retries")
+                    raise RuntimeError("Models not found in MinIO after maximum retries")
                 raise
             except Exception as e:
                 logger.error(f"Unexpected error loading models: {e}")
