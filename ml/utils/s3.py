@@ -18,8 +18,10 @@ def upload_to_minio(file_path, bucket_name, object_name):
         # Create bucket if it doesn't exist
         try:
             s3_client.head_bucket(Bucket=bucket_name)
-        except:
+        except ClientError:
             s3_client.create_bucket(Bucket=bucket_name)
+        except Exception as e:
+            print(f"Error creating bucket: {e}")
             
         # Upload file
         s3_client.upload_file(file_path, bucket_name, object_name)
